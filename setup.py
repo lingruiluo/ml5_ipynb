@@ -5,10 +5,10 @@ version = "0.1.0"
 readme = open('README.md').read()
 
 setup(
-    name="ml5_test",
-    packages=["ml5_test"],
+    name="ml5_ipynb",
+    packages=["ml5_ipynb"],
     version=version,
-    description="test version of ml5_ipynb",
+    description="Jupyter version of ml5.js",
     long_description=readme,
     include_package_data=True,
     author="Lingrui Luo",
