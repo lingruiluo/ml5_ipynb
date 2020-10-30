@@ -19,6 +19,7 @@ setup(
         "jp_doodle",
         "numpy", 
         "pandas",
+        "matplotlib",
         "pillow", 
         "imageio",
         "jupyter-ui-poll",
