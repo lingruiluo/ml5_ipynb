@@ -1,4 +1,4 @@
-from . import ml5_init
+from . import ml5_nn
 from . import utilis
 import jp_proxy_widget
 from IPython.display import display
@@ -6,7 +6,7 @@ from jupyter_ui_poll import ui_events
 import time
 
 
-class Kmeans(ml5_init.ML5Class):
+class Kmeans(ml5_nn.neuralNetwork):
 
     def __init__(self, options=None, data = None, *pargs, **kwargs):
         super(Kmeans,self).__init__(options=options,*pargs, **kwargs)

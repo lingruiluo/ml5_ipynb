@@ -1,4 +1,4 @@
-from . import ml5_init
+from . import ml5_nn
 from . import utilis
 import jp_proxy_widget
 from IPython.display import display
@@ -7,7 +7,7 @@ import numpy as np
 import time
 
 
-class imageClassifier(ml5_init.ML5Class):
+class imageClassifier(ml5_nn.neuralNetwork):
 
     def __init__(self, model, options=None, *pargs, **kwargs):
         super(imageClassifier,self).__init__(options=options,*pargs, **kwargs)
