@@ -62,10 +62,10 @@ class imageClassifier(ml5_nn.neuralNetwork):
                 }
                 var imageData = new Image(width, height)
                 imageData.src = src;
-                //console.log(imageData);
-                element.predict_images = []
-                element.predict_images.push(imageData);
-                element.nn_info.network.classify(element.predict_images[element.predict_images.length-1], num_of_class, handleResults);
+                # //console.log(imageData);
+                # element.predict_images = []
+                # element.predict_images.push(imageData);
+                element.nn_info.network.classify(imageData, num_of_class, handleResults);
 
             """, src=image, width=width, height=height,
                 num_of_class = num_of_class,
