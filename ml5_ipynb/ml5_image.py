@@ -30,6 +30,7 @@ class imageClassifier(ml5_nn.neuralNetwork):
                 model_ready()
             }
             element.predict_images = [];
+            let imageData;
         """,model = model,model_ready=model_ready)
         with ui_events() as poll:
             while self.model_load is False:
@@ -37,6 +38,7 @@ class imageClassifier(ml5_nn.neuralNetwork):
                 print('.', end='')
                 time.sleep(0.1)
         print('Model is ready')
+        time.sleep(0.5)
     
     def default_options(self):
         return {'version': 1,'alpha': 1.0,'topk': 3,}
@@ -49,6 +51,10 @@ class imageClassifier(ml5_nn.neuralNetwork):
         self.classify_done = False
         def done_callback():
             self.classify_done = True
+        
+        def message(info):
+            print(info)
+
         if isinstance(image,str):
             self.js_init("""
                 function handleResults(error, result) {
@@ -60,16 +66,20 @@ class imageClassifier(ml5_nn.neuralNetwork):
                     callback(result);
                     done_callback();
                 }
-                var imageData = new Image(width, height)
+                imageData = new Image(width, height);
                 imageData.src = src;
-                # //console.log(imageData);
-                # element.predict_images = []
-                # element.predict_images.push(imageData);
-                element.nn_info.network.classify(imageData, num_of_class, handleResults);
+                message("image created");
+                console.log(imageData);
+                // element.predict_images = []
+                // element.predict_images.push(imageData);
+                setTimeout(function(){ 
+                    element.nn_info.network.classify(imageData, num_of_class, handleResults);
+                     }, 100);
+                //element.nn_info.network.classify(imageData, num_of_class, handleResults);
 
             """, src=image, width=width, height=height,
                 num_of_class = num_of_class,
-                callback=callback, done_callback = done_callback)
+                callback=callback, done_callback = done_callback,message=message)
             with ui_events() as poll:
                 while self.classify_done is False:
                     poll(10)                # React to UI events (upto 10 at a time)
