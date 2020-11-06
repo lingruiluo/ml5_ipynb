@@ -18,7 +18,7 @@ def load_requirements(widget=None, silent=True, additional=()):
     # Make sure jQuery and jQueryUI are loaded.
     widget.check_jquery()
     # load additional jQuery plugin code.
-    ml5_js = ["https://unpkg.com/ml5@0.5.0/dist/ml5.js",
+    ml5_js = ["https://unpkg.com/ml5@0.6.0/dist/ml5.js",
               "https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"]
     widget.load_js_files(ml5_js)
     if not silent:
