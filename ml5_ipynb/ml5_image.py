@@ -36,7 +36,7 @@ class imageClassifier(ml5_nn.neuralNetwork):
                 poll(10)
                 print('.', end='')
                 time.sleep(0.1)
-        print('Modeal is ready')
+        print('Model is ready')
     
     def default_options(self):
         return {'version': 1,'alpha': 1.0,'topk': 3,}
