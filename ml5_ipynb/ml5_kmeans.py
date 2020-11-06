@@ -29,6 +29,7 @@ class Kmeans(ml5_nn.neuralNetwork):
 
     def initialize(self, data=None, options=None):
         
+        self.data_label = []
         def data_label_callback(info):
             self.data_label.append(info)
         
