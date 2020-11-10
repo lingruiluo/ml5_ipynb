@@ -75,8 +75,9 @@ class ObjectDetector(ml5_nn.neuralNetwork):
                 //console.log(imageData);
                 element.predict_images = []
                 element.predict_images.push(imageData);
-                element.nn_info.network.detect(element.predict_images[0], handleResults);
-
+                setTimeout(function(){ 
+                    element.nn_info.network.detect(element.predict_images[0], handleResults);
+                }, 100);
             """, src=image, width=width, height=height,
                 callback=callback, done_callback = done_callback)
             with ui_events() as poll:
@@ -132,8 +133,8 @@ class ObjectDetector(ml5_nn.neuralNetwork):
         
         if width is None or height is None:
             img_shape = image.shape
-            width = img_shape[0]
-            height = img_shape[1]
+            width = img_shape[1]
+            height = img_shape[0]
 
         if normalized:
             normalized_img = image.copy()
