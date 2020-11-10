@@ -69,4 +69,9 @@ A simple way to create kmean class is
 
 #### Object Detection
 
-Object detection method uses YOLO or CocoSsd model. ml5_ipynb 
+Object detection method uses YOLO or CocoSsd model. 
+
+```python
+# using YOLO
+nn = ml5_detector.ObjectDetector('yolo')
+```
