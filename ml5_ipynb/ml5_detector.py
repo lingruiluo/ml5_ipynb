@@ -4,6 +4,8 @@ import jp_proxy_widget
 from IPython.display import display
 from jupyter_ui_poll import ui_events
 import numpy as np
+import matplotlib.pyplot as plt
+import cv2
 import time
 
 
@@ -51,6 +53,7 @@ class ObjectDetector(ml5_nn.neuralNetwork):
         if callback is None:
             callback = self.detect_callback
         
+        self.detect_result = []
         self.detect = False
         def done_callback():
             self.detect = True
@@ -122,3 +125,38 @@ class ObjectDetector(ml5_nn.neuralNetwork):
                     print('.', end='')
                     time.sleep(0.1)
             print('done')
+
+    def draw_bounding_box(self, image, width=None, height=None, normalized=True, box_color=(0,255,0), box_thick=2):
+        if not self.detect_result:
+            raise Exception("No object detected")
+        
+        if width is None or height is None:
+            img_shape = image.shape
+            width = img_shape[0]
+            height = img_shape[1]
+
+        if normalized:
+            normalized_img = image.copy()
+            for i in range(len(self.detect_result)):
+                dt = self.detect_result[i]
+                normalized_x = int(dt['normalized']['x']*width)
+                normalized_y = int(dt['normalized']['y']*height)
+                normalized_w = int(dt['normalized']['width']*width)
+                normalized_h = int(dt['normalized']['height']*height)
+                print(dt['label'],normalized_x,normalized_y,normalized_w,normalized_h )
+                normalized_img = cv2.rectangle(normalized_img,
+                                    (normalized_x,normalized_y),
+                                    (normalized_x+normalized_w,normalized_y+normalized_h),
+                                    box_color, box_thick)
+            plt.imshow(normalized_img)
+        else:
+            un_img = image.copy()
+            for i in range(len(self.detect_result)):
+                dt = self.detect_result[i]
+                x = int(dt['x'])
+                y = int(dt['y'])
+                w = int(dt['width'])
+                h = int(dt['height'])
+                un_img = cv2.rectangle(un_img,(x, y),
+                                    (x+w, y+h),box_color,box_thick)
+            plt.imshow(un_img)
