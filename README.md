@@ -27,6 +27,8 @@ The module `ml5_ipynb` is a Jupyter widget version of ml5.js that provides a pos
 
 ### Current support models
 
+Let's briefly introduce the current models provided by ml5_ipynb. More details will be introducted in the [tutorial](https://github.com/lingruiluo/ml5_ipynb/blob/main/ml5_ipynb%20Tutorial.ipynb).
+
 #### Neural network
 
 The neural network class `neuralNetwork` supports three types of deep learning tasks:
@@ -54,8 +56,17 @@ The image classification method is designed to classify an image using pre-train
 #### KMeans
 
 ml5_ipynb also has some methods for machine learning models. Currently, we only have kmeans model but will support more later on. Kmeans is a cluster method that can be used for many tasks including image segmentation and object detection. This method is not a best choice for some of tasks such as object detection since it gives different results each time we initialize, however, it can still work.   
-In the (example)[https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/kmeans%20simple%20example.ipynb] we have here, kmeans uses default number of clusters which is 3 to cluster the image.  
+In the [example](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/kmeans%20simple%20example.ipynb) we have here, kmeans uses default number of clusters which is 3 to cluster the image.  
 <p align="center">
-  <img src="examples/pic/faces.jpg" width="200" title="Original image">
-  <img src="" width="350" alt="accessibility text">
+  <img src="examples/pic/faces.jpg" width="250" height="150" title="Original image">
+  <img src="examples/pic/clustered.jpg" width="250" height="150" title="Clustered image">
 </p>
+
+A simple way to create kmean class is 
+        ```
+        nn = ml5_kmeans.Kmeans()
+        ```
+
+#### Object Detection
+
+Object detection method uses YOLO or CocoSsd model. ml5_ipynb 
