@@ -19,6 +19,7 @@ setup(
         "jp_doodle",
         "numpy", 
         "pandas",
+        "opencv-python",
         "matplotlib",
         "pillow", 
         "imageio",
