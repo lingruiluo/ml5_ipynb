@@ -39,6 +39,7 @@ The type of task can be specified in the `options` before initializing the netwo
 ```python
 nn = ml5_ipynb.ml5_nn.neuralNetwork()
 ```
+Examples include [`Neural Network Simple Examples`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Neural%20Network%20Simple%20Examples.ipynb), [`color classification`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Color%20Classification.ipynb), [`CO2 Emission Example with multi-layers NN`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/CO2%20Emission%20Example%20with%20multi-layers%20NN.ipynb).
 
 #### Image Classification
 
@@ -52,6 +53,7 @@ The image classification method is designed to classify an image using pre-train
     path = 'user/mymodel.json'
     nn = ml5_ipynb.ml5_image.imageClassifier(path)
     ```
+Examples include [`Image Classifier`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Image%20Classifier.ipynb).
 
 #### KMeans
 
@@ -66,6 +68,7 @@ A simple way to create kmean class is
         ```
         nn = ml5_kmeans.Kmeans()
         ```
+There is an example [`kmeans simple example`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/kmeans%20simple%20example.ipynb).
 
 #### Object Detection
 
@@ -75,3 +78,4 @@ Object detection method uses YOLO or CocoSsd model.
 # using YOLO
 nn = ml5_detector.ObjectDetector('yolo')
 ```
+There is an example [`Object Detection using YOLO`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Object%20Detection%20using%20YOLO.ipynb)
