@@ -78,4 +78,4 @@ Object detection method uses YOLO or CocoSsd model.
 # using YOLO
 nn = ml5_detector.ObjectDetector('yolo')
 ```
-There is an example [`Object Detection using YOLO`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Object%20Detection%20using%20YOLO.ipynb)
+There is an example [`Object Detection using YOLO`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Object%20Detection%20using%20YOLO.ipynb).
