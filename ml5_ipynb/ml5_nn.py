@@ -40,6 +40,7 @@ class neuralNetwork(jp_proxy_widget.JSProxyWidget):
         self.predict_callback_list = []
         self.train_done = False
         self.classify_done = False
+        self.model_created = False
 
     def default_options(self):
         return {
@@ -62,12 +63,22 @@ class neuralNetwork(jp_proxy_widget.JSProxyWidget):
     def initialize_framework(self, options=None):
         if options is None:
             options = self.options
+        def model_create():
+            self.model_created = True
         self.js_init("""
             const nn = ml5.neuralNetwork(options);
             console.log("create network done!");
             element.nn_info = {
                 network: nn };
-        """, options = options)
+            model_create();
+        """, options = options, model_create=model_create)
+        with ui_events() as poll:
+            while self.model_created is False:
+                poll(10)
+                print('.', end='')
+                time.sleep(0.1)
+        print('Model is created')
+        time.sleep(0.05)
 
     def add_data(self, inputs, outputs):
         self.js_init("""
