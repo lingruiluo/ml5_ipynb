@@ -86,3 +86,9 @@ Object detection method uses YOLO or CocoSsd model.
 nn = ml5_detector.ObjectDetector('yolo')
 ```
 There is an example [`Object detection using YOLO`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Object%20detection%20using%20YOLO.ipynb) and [`Object detection comparison between yolo and cocossd`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Object%20detection%20comparison%20between%20yolo%20and%20cocossd.ipynb).
+
+An example image that is outputted from CocoSsd model is as below: 
+<p align="center">
+  <img src="examples/pic/coco.png" width="300" height="200" title="Cocossd">
+</p>
+
