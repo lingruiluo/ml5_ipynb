@@ -39,7 +39,7 @@ class ObjectDetector(ml5_nn.neuralNetwork):
                 poll(10)
                 print('.', end='')
                 time.sleep(0.1)
-        print('Modeal is ready')
+        print('Model is ready')
 
     def default_options(self):
         return {'filterBoxesThreshold': 0.01, 
@@ -127,7 +127,7 @@ class ObjectDetector(ml5_nn.neuralNetwork):
                     time.sleep(0.1)
             print('done')
 
-    def draw_bounding_box(self, image, width=None, height=None, normalized=True, box_color=(0,255,0), box_thick=2):
+    def draw_bounding_box(self, image, width=None, height=None, normalized=True, box_color=(0,255,0), box_thick=2, text_color="white"):
         if not self.detect_result:
             raise Exception("No object detected")
         
@@ -136,6 +136,8 @@ class ObjectDetector(ml5_nn.neuralNetwork):
             width = img_shape[1]
             height = img_shape[0]
 
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
         if normalized:
             normalized_img = image.copy()
             for i in range(len(self.detect_result)):
@@ -145,11 +147,13 @@ class ObjectDetector(ml5_nn.neuralNetwork):
                 normalized_w = int(dt['normalized']['width']*width)
                 normalized_h = int(dt['normalized']['height']*height)
                 print(dt['label'],normalized_x,normalized_y,normalized_w,normalized_h )
+                ax.annotate(dt['label'], xy=(normalized_x, normalized_y), xytext=(10, -10),textcoords="offset points",color=text_color)
                 normalized_img = cv2.rectangle(normalized_img,
                                     (normalized_x,normalized_y),
                                     (normalized_x+normalized_w,normalized_y+normalized_h),
                                     box_color, box_thick)
-            plt.imshow(normalized_img)
+            ax.imshow(normalized_img)
+
         else:
             un_img = image.copy()
             for i in range(len(self.detect_result)):
@@ -158,6 +162,9 @@ class ObjectDetector(ml5_nn.neuralNetwork):
                 y = int(dt['y'])
                 w = int(dt['width'])
                 h = int(dt['height'])
+                print(dt['label'],x, y, w, h )
+                ax.annotate(dt['label'], xy=(x, y), xytext=(10, -10),textcoords="offset points",color=text_color)
                 un_img = cv2.rectangle(un_img,(x, y),
                                     (x+w, y+h),box_color,box_thick)
-            plt.imshow(un_img)
+            
+            ax.imshow(un_img)
