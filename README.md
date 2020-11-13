@@ -39,7 +39,14 @@ The type of task can be specified in the `options` before initializing the netwo
 ```python
 nn = ml5_ipynb.ml5_nn.neuralNetwork()
 ```
-Examples include [`Neural Network Simple Examples`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Neural%20Network%20Simple%20Examples.ipynb), [`color classification`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Color%20Classification.ipynb), [`CO2 Emission Example with multi-layers NN`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/CO2%20Emission%20Example%20with%20multi-layers%20NN.ipynb).
+Examples include [`Simple neural network examples`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Simple%20neural%20network%20examples.ipynb), [`CO2 emission example with multi-layers NN`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/CO2%20emission%20example%20with%20multi-layers%20NN.ipynb).
+
+The network can also be collaborated with other Jupyter widgets such as [`jp_doodle`](https://github.com/AaronWatters/jp_doodle). The following example [`Color classification widget`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Color%20classification%20widget.ipynb) is a small color classification tool built by ml5_ipynb and jp_doodle. 
+<p align="center">
+  <img src="examples/pic/color_widget.png" width="450" height="250" title="Color classification widget">
+</p>
+
+
 
 #### Image Classification
 
@@ -53,7 +60,7 @@ The image classification method is designed to classify an image using pre-train
     path = 'user/mymodel.json'
     nn = ml5_ipynb.ml5_image.imageClassifier(path)
     ```
-Examples include [`Image Classifier`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Image%20Classifier.ipynb).
+Examples include [`Image classifier on bird examples`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Image%20classifier%20on%20bird%20examples.ipynb).
 
 #### KMeans
 
@@ -78,4 +85,4 @@ Object detection method uses YOLO or CocoSsd model.
 # using YOLO
 nn = ml5_detector.ObjectDetector('yolo')
 ```
-There is an example [`Object Detection using YOLO`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Object%20Detection%20using%20YOLO.ipynb).
+There is an example [`Object detection using YOLO`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Object%20detection%20using%20YOLO.ipynb) and [`Object detection comparison between yolo and cocossd`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Object%20detection%20comparison%20between%20yolo%20and%20cocossd.ipynb).
