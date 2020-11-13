@@ -77,7 +77,7 @@ class ObjectDetector(ml5_nn.neuralNetwork):
                 element.predict_images.push(imageData);
                 setTimeout(function(){ 
                     element.nn_info.network.detect(element.predict_images[0], handleResults);
-                }, 100);
+                }, 20);
             """, src=image, width=width, height=height,
                 callback=callback, done_callback = done_callback)
             with ui_events() as poll:

@@ -38,7 +38,7 @@ class imageClassifier(ml5_nn.neuralNetwork):
                 print('.', end='')
                 time.sleep(0.1)
         print('Model is ready')
-        time.sleep(0.5)
+        time.sleep(0.05)
     
     def default_options(self):
         return {'version': 1,'alpha': 1.0,'topk': 3,}
@@ -74,7 +74,7 @@ class imageClassifier(ml5_nn.neuralNetwork):
                 // element.predict_images.push(imageData);
                 setTimeout(function(){ 
                     element.nn_info.network.classify(imageData, num_of_class, handleResults);
-                     }, 100);
+                     }, 20);
                 //element.nn_info.network.classify(imageData, num_of_class, handleResults);
 
             """, src=image, width=width, height=height,
