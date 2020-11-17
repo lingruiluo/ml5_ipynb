@@ -51,9 +51,14 @@ class word2Vec(ml5_nn.neuralNetwork):
             callback = add_callback
         self.js_init("""
             element.nn_info.network.add(words, (err, results)=>{
+                if(err){
+                    console.error(err);
+                    return;
+                }
                 console.log(results);
                 callback(results);
             });
+            
         """, words = words, callback = callback)
         with ui_events() as poll:
             while self.track is False:
@@ -72,6 +77,10 @@ class word2Vec(ml5_nn.neuralNetwork):
             callback = subtract_callback
         self.js_init("""
             element.nn_info.network.subtract(words, (err, results)=>{
+                if(err){
+                    console.error(err);
+                    return;
+                }
                 console.log(results);
                 callback(results);
             });
@@ -93,6 +102,10 @@ class word2Vec(ml5_nn.neuralNetwork):
 
         self.js_init("""
             element.nn_info.network.average(words, (err, results)=>{
+                if(err){
+                    console.error(err);
+                    return;
+                }
                 console.log(results);
                 callback(results);
             });
@@ -114,6 +127,10 @@ class word2Vec(ml5_nn.neuralNetwork):
 
         self.js_init("""
             element.nn_info.network.nearest(word, (err, results)=>{
+                if(err){
+                    console.error(err);
+                    return;
+                }
                 console.log(results);
                 callback(results);
             });
@@ -135,6 +152,10 @@ class word2Vec(ml5_nn.neuralNetwork):
 
         self.js_init("""
             element.nn_info.network.nearest(word, (err, results)=>{
+                if(err){
+                    console.error(err);
+                    return;
+                }
                 console.log(results);
                 callback(results);
             });
@@ -156,13 +177,17 @@ class word2Vec(ml5_nn.neuralNetwork):
 
         self.js_init("""
             element.nn_info.network.nearestFromSet(word, word_set, (err, results)=>{
-                    console.log(results);
-                    callback(results);
+                if(err){
+                    console.error(err);
+                    return;
+                }
+                console.log(results);
+                callback(results);
             });
         """, word = word, word_set = word_set, callback = callback)
         with ui_events() as poll:
             while self.track is False:
-                poll(10)                # React to UI events (upto 10 at a time)
+                poll(10)               
                 print('.', end='')
                 time.sleep(0.1)
         print('done')
