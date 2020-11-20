@@ -130,7 +130,7 @@ class imageClassifier(ml5_nn.neuralNetwork):
 
 class featureExtractor(ml5_nn.neuralNetwork):
     
-    def __init__(self, model, options=None, *pargs, **kwargs):
+    def __init__(self, task, model='MobileNet', options=None, *pargs, **kwargs):
         super(featureExtractor,self).__init__(options=options,*pargs, **kwargs)
         self.element.html("Loaded ml5.js")
         self.classify_callback_list = []
@@ -138,16 +138,30 @@ class featureExtractor(ml5_nn.neuralNetwork):
         self.model_load = False
         def model_ready():
             self.model_load = True
-        
-        self.js_init("""
-            element.nn_info = {};
-            const fe = ml5.featureExtractor(model, modelReady);
-            element.nn_info.network = fe;
-            function modelReady() {
-                console.log('Model Ready!');
-                model_ready()
-            }
-        """,model = model,model_ready=model_ready)
+        if task == 'classification':
+            self.js_init("""
+                element.nn_info = {};
+                const fe = ml5.featureExtractor(model,modelReady);
+                const classifier = fe.classification();
+                element.nn_info.network = classifier;
+                function modelReady() {
+                    console.log('Model Ready!');
+                    model_ready()
+                }
+                let imageData;
+            """,model = model,model_ready=model_ready)
+        else:
+            self.js_init("""
+                element.nn_info = {};
+                const fe = ml5.featureExtractor(model,modelReady);
+                const regressor = fe.regression();
+                element.nn_info.network = regressor;
+                function modelReady() {
+                    console.log('Model Ready!');
+                    model_ready()
+                }
+                let imageData;
+            """,model = model,model_ready=model_ready)
         with ui_events() as poll:
             while self.model_load is False:
                 poll(10)
@@ -165,13 +179,14 @@ class featureExtractor(ml5_nn.neuralNetwork):
         if isinstance(img,str):
             self.js_init("""
                 function image_added() {
+                    console.log("added");
                     done_callback();
                 }
-                let imageData = new Image(width, height);
+                imageData = new Image(width, height);
                 imageData.src = src;
                 setTimeout(function(){ 
-                    element.nn.addImage(input = imageData, label=label, callback = image_added);
-                     }, 20);
+                    element.nn_info.network.addImage(imageData, label, image_added);
+                     }, 30);
             """, src=img, 
                  width=width, height=height,
                  label = label,
@@ -198,9 +213,10 @@ class featureExtractor(ml5_nn.neuralNetwork):
                 imgData.data.set(d);
                 
                 function image_added() {
+                    console.log("added");
                     done_callback();
                 }
-                element.nn.addImage(input = imageData, label=label, callback = image_added);
+                element.nn_info.network.addImage(imgData, label, image_added);
             """,d = img, width=width, height=height,
                 label = label,
                 done_callback = self.done_callback)
@@ -212,13 +228,13 @@ class featureExtractor(ml5_nn.neuralNetwork):
         print('done')
     
     def train(self):
-        
+        self.track = False
         def message(info):
             print(info)
 
         self.js_init("""
-            if (element.nn.hasAnyTrainedClass){
-                element.nn.train((lossValue) => {
+            if (element.nn_info.network.hasAnyTrainedClass){
+                element.nn_info.network.train((lossValue) => {
                     console.log('Loss is', lossValue);
                 });
             } else {
@@ -227,5 +243,65 @@ class featureExtractor(ml5_nn.neuralNetwork):
             done_callback();
         """, message=message,
              done_callback=self.done_callback)
+        with ui_events() as poll:
+            while self.track is False:
+                poll(10)                # React to UI events (upto 10 at a time)
+                print('.', end='')
+                time.sleep(0.1)
+        print('done')
 
-    def classify(self, img)
+    def classify(self, img, width=299, height=299,callback=None):
+        
+        if callback is None:
+            callback = self.classify_callback
+
+        if isinstance(img,str):
+            self.js_init("""
+                let new_image = new Image(width, height);
+                new_image.src = src;
+                setTimeout(function(){ 
+                    element.nn_info.network.classify(new_image, (err, result) => {
+                        console.log(result);
+                        callback(result); 
+                        done_callback();
+                    })}, 30);
+            """, src=img, 
+                 width=width, height=height, 
+                 callback = callback,
+                 done_callback=self.done_callback)
+        else:
+            if isinstance(img,np.ndarray):
+                if len(img.shape)==1:
+                    if width*height!=img.shape[0]:
+                        raise ValueError('image shape should be consistent with width and height')
+                elif len(img.shape)==2:
+                    raise ValueError("Please provide a rgba image pixel array")
+                else:
+                    if img.shape[2]!=4:
+                        raise ValueError("Please provide a rgba image pixel array")
+                    else:
+                        img = img.flatten()
+                img = img.tolist()
+            self.js_init("""
+                var canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                var ctx = canvas.getContext('2d');
+                var imgData=ctx.getImageData(0,0,width,height);
+                imgData.data.set(d);
+                
+                setTimeout(function(){ 
+                    element.nn_info.network.classify(imgData, (err, result) => {
+                        console.log(result);
+                        callback(result); 
+                        done_callback();
+                    })}, 30);
+            """,d = img, width=width, height=height,
+                callback = callback,
+                done_callback = self.done_callback)
+        with ui_events() as poll:
+            while self.track is False:
+                poll(10)                # React to UI events (upto 10 at a time)
+                print('.', end='')
+                time.sleep(0.1)
+        print('done')
