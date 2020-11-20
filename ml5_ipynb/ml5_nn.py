@@ -41,6 +41,7 @@ class neuralNetwork(jp_proxy_widget.JSProxyWidget):
         self.train_done = False
         self.classify_done = False
         self.model_created = False
+        self.model_load = False
 
     def default_options(self):
         return {
@@ -102,7 +103,8 @@ class neuralNetwork(jp_proxy_widget.JSProxyWidget):
         
         self.js_init("""
             function whileTraining(epoch, loss) {
-                console.log(epoch);
+                //console.log(epoch);
+                console.log(loss);
                 console.log(`epoch: ${epoch}, loss:${loss}`);
             }
             function doneTraining() {
@@ -173,3 +175,45 @@ class neuralNetwork(jp_proxy_widget.JSProxyWidget):
 
     def predict_callback(self, info):
         self.predict_callback_list.append(info)
+
+
+    def save(self, output_name='model'):
+        self.js_init("""
+            function model_saved(){
+                console.log("model saved");
+            }
+            element.nn_info.network.save(output_name, model_saved);
+        """, output_name=output_name)
+    
+    def load(self, model, metadata, weights, modelLoaded=None):
+        self.model_load = False
+        def default_modelLoaded():
+            print("model loaded")
+        
+        def check_load():
+            self.model_load = True
+        if modelLoaded is None:
+            modelLoaded = default_modelLoaded
+        
+        modelDetails = {
+            'model': model,
+            'metadata': metadata,
+            'weights': weights
+        }
+
+        self.js_init("""
+            function modelLoaded_callback(){
+                modelLoaded();
+                check_load();
+                console.log("model loaded");
+            }
+            element.nn_info.network.load(modelDetails, modelLoaded_callback);
+        """, modelDetails = modelDetails, 
+             modelLoaded=modelLoaded,
+             check_load = check_load)
+        with ui_events() as poll:
+            while self.model_load is False:
+                poll(10)
+                print('.', end='')
+                time.sleep(0.1)
+        print('done')
