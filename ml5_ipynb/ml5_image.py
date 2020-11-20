@@ -125,3 +125,107 @@ class imageClassifier(ml5_nn.neuralNetwork):
                     print('.', end='')
                     time.sleep(0.1)
             print('done')
+
+
+
+class featureExtractor(ml5_nn.neuralNetwork):
+    
+    def __init__(self, model, options=None, *pargs, **kwargs):
+        super(featureExtractor,self).__init__(options=options,*pargs, **kwargs)
+        self.element.html("Loaded ml5.js")
+        self.classify_callback_list = []
+        self.track = False
+        self.model_load = False
+        def model_ready():
+            self.model_load = True
+        
+        self.js_init("""
+            element.nn_info = {};
+            const fe = ml5.featureExtractor(model, modelReady);
+            element.nn_info.network = fe;
+            function modelReady() {
+                console.log('Model Ready!');
+                model_ready()
+            }
+        """,model = model,model_ready=model_ready)
+        with ui_events() as poll:
+            while self.model_load is False:
+                poll(10)
+                print('.', end='')
+                time.sleep(0.1)
+        print('Model is ready')
+        time.sleep(0.05)
+    
+    def done_callback(self):
+        self.track = True
+
+    def add_image(self, img, label, width=299, height=299):
+        self.track = False
+
+        if isinstance(img,str):
+            self.js_init("""
+                function image_added() {
+                    done_callback();
+                }
+                let imageData = new Image(width, height);
+                imageData.src = src;
+                setTimeout(function(){ 
+                    element.nn.addImage(input = imageData, label=label, callback = image_added);
+                     }, 20);
+            """, src=img, 
+                 width=width, height=height,
+                 label = label,
+                 done_callback=self.done_callback)
+        else:
+            if isinstance(img,np.ndarray):
+                if len(img.shape)==1:
+                    if width*height!=img.shape[0]:
+                        raise ValueError('image shape should be consistent with width and height')
+                elif len(img.shape)==2:
+                    raise ValueError("Please provide a rgba image pixel array")
+                else:
+                    if img.shape[2]!=4:
+                        raise ValueError("Please provide a rgba image pixel array")
+                    else:
+                        img = img.flatten()
+                img = img.tolist()
+            self.js_init("""
+                var canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                var ctx = canvas.getContext('2d');
+                var imgData=ctx.getImageData(0,0,width,height);
+                imgData.data.set(d);
+                
+                function image_added() {
+                    done_callback();
+                }
+                element.nn.addImage(input = imageData, label=label, callback = image_added);
+            """,d = img, width=width, height=height,
+                label = label,
+                done_callback = self.done_callback)
+        with ui_events() as poll:
+            while self.track is False:
+                poll(10)                # React to UI events (upto 10 at a time)
+                print('.', end='')
+                time.sleep(0.1)
+        print('done')
+    
+    def train(self):
+        
+        def message(info):
+            print(info)
+
+        self.js_init("""
+            if (element.nn.hasAnyTrainedClass){
+                element.nn.train((lossValue) => {
+                    console.log('Loss is', lossValue);
+                });
+            } else {
+                message("No new data added");
+            }
+            done_callback();
+        """, message=message,
+             done_callback=self.done_callback)
+
+    def classify(self, img)
