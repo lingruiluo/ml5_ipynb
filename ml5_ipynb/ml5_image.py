@@ -136,7 +136,7 @@ class imageClassifier(ml5_nn.neuralNetwork):
         self.js_init("""
             const load_model = async () => {
                 console.log("loading...");
-                let my_model = tf.loadLayersModel(path);
+                let my_model = await tf.loadLayersModel(path);
                 element.nn_info.network = my_model;
             }
             load_model();
@@ -158,8 +158,9 @@ class imageClassifier(ml5_nn.neuralNetwork):
         self.js_init("""
             let img = new Image();
             img.src = img_path; 
-            img.width = 192;
-            img.height = 192;
+            img.width = input_shape[0];
+            img.height = input_shape[1];
+            let my_model = element.nn_info.network;
             async function predict(imgElement) {
                 console.log('Predicting...');
                 const startTime1 = performance.now();
@@ -167,8 +168,8 @@ class imageClassifier(ml5_nn.neuralNetwork):
 
                 const logits = tf.tidy(() => {
                     // tf.browser.fromPixels() returns a Tensor from an image element.
-                    const img = tf.browser.fromPixels(imgElement).toFloat();
-                    const normalized = img.div(255.0);
+                    const img_array = tf.browser.fromPixels(imgElement).toFloat();
+                    const normalized = img_array.div(255.0);
                     // Reshape to a single-element batch so we can pass it to predict.
                     let width = input_shape[0];
                     let height = input_shape[1];
@@ -176,8 +177,16 @@ class imageClassifier(ml5_nn.neuralNetwork):
                     const batched = normalized.reshape([1, width, height, channel]);
 
                     startTime2 = performance.now();
-                    return element.nn_info.network.predict(batched);
+                    const prediction = my_model.predict(batched);
+                    return prediction;
                 });
+                
+                async function getClasses(logits) {
+                    const values = await logits.data();
+                    console.log(values);
+                    callback(values);
+                    return values;
+                }
 
                 // Convert logits to probabilities and class names.
                 const classes = await getClasses(logits);
@@ -186,14 +195,6 @@ class imageClassifier(ml5_nn.neuralNetwork):
                 console.log(`Done in ${Math.floor(totalTime1)} ms ` +
                     `(not including preprocessing: ${Math.floor(totalTime2)} ms)`);
                 done_callback();
-                }
-                async function getClasses(logits) {
-                    const values = await logits.data();
-                    console.log(values);
-                    callback(values);
-                    return values;
-                }
-                return classes;
             };
             predict(img);
             message("done");
