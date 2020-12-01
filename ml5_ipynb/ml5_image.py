@@ -156,10 +156,12 @@ class imageClassifier(ml5_nn.neuralNetwork):
         if callback is None:
             callback = self.classify_callback
         self.js_init("""
-            let img = new Image();
-            img.src = img_path; 
-            img.width = input_shape[0];
-            img.height = input_shape[1];
+            let width = input_shape[0];
+            let height = input_shape[1];
+            let channel = input_shape[2];
+            imageData = new Image(width, height);
+            imageData.src = img_path;
+            //imageData.crossOrigin = "anonymous";
             let my_model = element.nn_info.network;
             async function predict(imgElement) {
                 console.log('Predicting...');
@@ -171,9 +173,6 @@ class imageClassifier(ml5_nn.neuralNetwork):
                     const img_array = tf.browser.fromPixels(imgElement).toFloat();
                     const normalized = img_array.div(255.0);
                     // Reshape to a single-element batch so we can pass it to predict.
-                    let width = input_shape[0];
-                    let height = input_shape[1];
-                    let channel = input_shape[2];
                     const batched = normalized.reshape([1, width, height, channel]);
 
                     startTime2 = performance.now();
@@ -196,7 +195,9 @@ class imageClassifier(ml5_nn.neuralNetwork):
                     `(not including preprocessing: ${Math.floor(totalTime2)} ms)`);
                 done_callback();
             };
-            predict(img);
+            setTimeout(function(){ 
+                predict(imageData);
+            }, 50);
             message("done");
         """, img_path = img_path, input_shape = input_shape,
              callback = callback, message = self.message, done_callback = self.done_callback)
