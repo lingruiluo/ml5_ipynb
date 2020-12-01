@@ -9,17 +9,18 @@ import time
 
 class imageClassifier(ml5_nn.neuralNetwork):
 
-    def __init__(self, model, options=None, *pargs, **kwargs):
+    def __init__(self, model=None, options=None, *pargs, **kwargs):
         super(imageClassifier,self).__init__(options=options,*pargs, **kwargs)
         self.data = []
         if options is None:
             options = self.default_options()
+        if model is None:
+            model = 'MobileNet'
+        # self.model_path = model
         self.element.html("Loaded ml5.js")
         self.classify_callback_list = []
         self.classify_done = False
         self.model_load = False
-        def model_ready():
-            self.model_load = True
 
         self.js_init("""
             element.nn_info = {};
@@ -31,7 +32,7 @@ class imageClassifier(ml5_nn.neuralNetwork):
             }
             element.predict_images = [];
             let imageData;
-        """,model = model,model_ready=model_ready)
+        """,model = model,model_ready=self.model_ready)
         with ui_events() as poll:
             while self.model_load is False:
                 poll(10)
@@ -43,17 +44,21 @@ class imageClassifier(ml5_nn.neuralNetwork):
     def default_options(self):
         return {'version': 1,'alpha': 1.0,'topk': 3,}
 
+    def model_ready(self):
+        self.model_load = True
+
+    def done_callback(self):
+            self.classify_done = True
+    
+    def message(self,info):
+            print(info)
+
     def classify_data(self, image, width=400, height=400, 
                     num_of_class = 3, callback=None):
         if callback is None:
             callback = self.classify_callback
         
         self.classify_done = False
-        def done_callback():
-            self.classify_done = True
-        
-        def message(info):
-            print(info)
 
         if isinstance(image,str):
             self.js_init("""
@@ -79,7 +84,7 @@ class imageClassifier(ml5_nn.neuralNetwork):
 
             """, src=image, width=width, height=height,
                 num_of_class = num_of_class,
-                callback=callback, done_callback = done_callback,message=message)
+                callback=callback, done_callback = self.done_callback,message=self.message)
             with ui_events() as poll:
                 while self.classify_done is False:
                     poll(10)                # React to UI events (upto 10 at a time)
@@ -125,8 +130,115 @@ class imageClassifier(ml5_nn.neuralNetwork):
                     print('.', end='')
                     time.sleep(0.1)
             print('done')
+    
+    def keras_loadModel(self, path):
+        self.model_load = False
+        self.js_init("""
+            const load_model = async () => {
+                console.log("loading...");
+                let my_model = tf.loadLayersModel(path);
+                element.nn_info.network = my_model;
+            }
+            load_model();
+            console.log("loaded");
+            model_ready();
+        """,path=path, model_ready = self.model_ready)
+        with ui_events() as poll:
+            while self.model_load is False:
+                poll(10)
+                print('.', end='')
+                time.sleep(0.1)
+        print('Model is ready')
+
+    
+    def keras_predict(self, img_path, input_shape, callback=None):
+        self.classify_done = False
+        if callback is None:
+            callback = self.classify_callback
+        self.js_init("""
+            let img = new Image();
+            img.src = img_path; 
+            img.width = 192;
+            img.height = 192;
+            async function predict(imgElement) {
+                console.log('Predicting...');
+                const startTime1 = performance.now();
+                let startTime2;
+
+                const logits = tf.tidy(() => {
+                    // tf.browser.fromPixels() returns a Tensor from an image element.
+                    const img = tf.browser.fromPixels(imgElement).toFloat();
+                    const normalized = img.div(255.0);
+                    // Reshape to a single-element batch so we can pass it to predict.
+                    let width = input_shape[0];
+                    let height = input_shape[1];
+                    let channel = input_shape[2];
+                    const batched = normalized.reshape([1, width, height, channel]);
+
+                    startTime2 = performance.now();
+                    return element.nn_info.network.predict(batched);
+                });
+
+                // Convert logits to probabilities and class names.
+                const classes = await getClasses(logits);
+                const totalTime1 = performance.now() - startTime1;
+                const totalTime2 = performance.now() - startTime2;
+                console.log(`Done in ${Math.floor(totalTime1)} ms ` +
+                    `(not including preprocessing: ${Math.floor(totalTime2)} ms)`);
+                done_callback();
+                }
+                async function getClasses(logits) {
+                    const values = await logits.data();
+                    console.log(values);
+                    callback(values);
+                    return values;
+                }
+                return classes;
+            };
+            predict(img);
+            message("done");
+        """, img_path = img_path, input_shape = input_shape,
+             callback = callback, message = self.message, done_callback = self.done_callback)
+        with ui_events() as poll:
+            while self.classify_done is False:
+                poll(10)                # React to UI events (upto 10 at a time)
+                print('.', end='')
+                time.sleep(0.1)
+        print('done')
 
 
+class imageClassifier(ml5_nn.neuralNetwork):
+    
+    def __init__(self, model, options=None, *pargs, **kwargs):
+        super(imageClassifier,self).__init__(options=options,*pargs, **kwargs)
+        self.data = []
+        if options is None:
+            options = self.default_options()
+        self.element.html("Loaded ml5.js")
+        self.classify_callback_list = []
+        self.classify_done = False
+        self.model_load = False
+        def model_ready():
+            self.model_load = True
+
+        self.js_init("""
+            element.nn_info = {};
+            const image_model = ml5.imageClassifier(model, modelReady);
+            element.nn_info.network = image_model;
+            function modelReady() {
+                console.log('Model Ready!');
+                model_ready()
+            }
+            element.predict_images = [];
+            let imageData;
+        """,model = model,model_ready=model_ready)
+        with ui_events() as poll:
+            while self.model_load is False:
+                poll(10)
+                print('.', end='')
+                time.sleep(0.1)
+        print('Model is ready')
+        time.sleep(0.05)
 
 class featureExtractor(ml5_nn.neuralNetwork):
     

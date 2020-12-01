@@ -19,7 +19,8 @@ def load_requirements(widget=None, silent=True, additional=()):
     widget.check_jquery()
     # load additional jQuery plugin code.
     ml5_js = ["https://unpkg.com/ml5@0.6.0/dist/ml5.js",
-              "https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"]
+              "https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js",
+              "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"]
     widget.load_js_files(ml5_js)
     if not silent:
         widget.element.html("<div>Requirements for <b>chart_ipynb</b> have been loaded.</div>")
@@ -185,7 +186,7 @@ class neuralNetwork(jp_proxy_widget.JSProxyWidget):
             element.nn_info.network.save(output_name, model_saved);
         """, output_name=output_name)
     
-    def load(self, model, metadata, weights, modelLoaded=None):
+    def load(self, model, metadata=None, weights=None, modelLoaded=None):
         self.model_load = False
         def default_modelLoaded():
             print("model loaded")
@@ -194,12 +195,14 @@ class neuralNetwork(jp_proxy_widget.JSProxyWidget):
             self.model_load = True
         if modelLoaded is None:
             modelLoaded = default_modelLoaded
-        
-        modelDetails = {
-            'model': model,
-            'metadata': metadata,
-            'weights': weights
-        }
+        modelDetails = model
+        if metadata is not None and weights is not None:
+            modelDetails = {
+                'model': model,
+                'metadata': metadata,
+                'weights': weights
+            }
+
 
         self.js_init("""
             function modelLoaded_callback(){
