@@ -207,39 +207,6 @@ class imageClassifier(ml5_nn.neuralNetwork):
         print('done')
 
 
-class imageClassifier(ml5_nn.neuralNetwork):
-    
-    def __init__(self, model, options=None, *pargs, **kwargs):
-        super(imageClassifier,self).__init__(options=options,*pargs, **kwargs)
-        self.data = []
-        if options is None:
-            options = self.default_options()
-        self.element.html("Loaded ml5.js")
-        self.classify_callback_list = []
-        self.classify_done = False
-        self.model_load = False
-        def model_ready():
-            self.model_load = True
-
-        self.js_init("""
-            element.nn_info = {};
-            const image_model = ml5.imageClassifier(model, modelReady);
-            element.nn_info.network = image_model;
-            function modelReady() {
-                console.log('Model Ready!');
-                model_ready()
-            }
-            element.predict_images = [];
-            let imageData;
-        """,model = model,model_ready=model_ready)
-        with ui_events() as poll:
-            while self.model_load is False:
-                poll(10)
-                print('.', end='')
-                time.sleep(0.1)
-        print('Model is ready')
-        time.sleep(0.05)
-
 class featureExtractor(ml5_nn.neuralNetwork):
     
     def __init__(self, task, model='MobileNet', options=None, *pargs, **kwargs):
