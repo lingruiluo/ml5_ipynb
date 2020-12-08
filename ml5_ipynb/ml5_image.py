@@ -123,7 +123,7 @@ class imageClassifier(ml5_nn.neuralNetwork):
                 element.nn_info.network.classify(imgData, num_of_class, handleResults);
             """,d = image, width=width, height=height,
                 num_of_class = num_of_class,
-                callback=callback, done_callback = done_callback)
+                callback=callback, done_callback = self.done_callback)
             with ui_events() as poll:
                 while self.classify_done is False:
                     poll(10)                # React to UI events (upto 10 at a time)
