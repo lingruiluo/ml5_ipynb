@@ -151,56 +151,165 @@ class imageClassifier(ml5_nn.neuralNetwork):
         print('Model is ready')
 
     
-    def keras_predict(self, img_path, input_shape, callback=None):
+    def keras_predict(self, img, input_shape, callback=None):
+
         self.classify_done = False
         if callback is None:
             callback = self.classify_callback
-        self.js_init("""
-            let width = input_shape[0];
-            let height = input_shape[1];
-            let channel = input_shape[2];
-            imageData = new Image(width, height);
-            imageData.src = img_path;
-            //imageData.crossOrigin = "anonymous";
-            let my_model = element.nn_info.network;
-            async function predict(imgElement) {
-                console.log('Predicting...');
-                const startTime1 = performance.now();
-                let startTime2;
+        height, width, channel = input_shape
+        if isinstance(img,str):
+            self.js_init("""
+                imageData = new Image(width, height);
+                imageData.src = img_path;
+                //imageData.crossOrigin = "anonymous";
+                element.nn_info.image = imageData;
 
-                const logits = tf.tidy(() => {
-                    // tf.browser.fromPixels() returns a Tensor from an image element.
-                    const img_array = tf.browser.fromPixels(imgElement).toFloat();
-                    const normalized = img_array.div(255.0);
-                    // Reshape to a single-element batch so we can pass it to predict.
-                    const batched = normalized.reshape([1, width, height, channel]);
+                                    let my_model = element.nn_info.network;
+                    async function predict(imgElement, width, height, channel) {
+                        console.log('Predicting...');
+                        const startTime1 = performance.now();
+                        let startTime2;
 
-                    startTime2 = performance.now();
-                    const prediction = my_model.predict(batched);
-                    return prediction;
-                });
-                
-                async function getClasses(logits) {
-                    const values = await logits.data();
-                    console.log(values);
-                    callback(values);
-                    return values;
-                }
+                        const logits = tf.tidy(() => {
+                            // tf.browser.fromPixels() returns a Tensor from an image element.
+                            const img_array = tf.browser.fromPixels(imgElement).toFloat();
+                            console.log(imgElement);
+                            console.log(img_array);
+                            const normalized = img_array.div(255.0);
+                            // Reshape to a single-element batch so we can pass it to predict.
+                            const batched = normalized.reshape([1, width, height, channel]);
 
-                // Convert logits to probabilities and class names.
-                const classes = await getClasses(logits);
-                const totalTime1 = performance.now() - startTime1;
-                const totalTime2 = performance.now() - startTime2;
-                console.log(`Done in ${Math.floor(totalTime1)} ms ` +
-                    `(not including preprocessing: ${Math.floor(totalTime2)} ms)`);
-                done_callback();
-            };
-            setTimeout(function(){ 
-                predict(imageData);
-            }, 50);
-            message("done");
-        """, img_path = img_path, input_shape = input_shape,
+                            startTime2 = performance.now();
+                            const prediction = my_model.predict(batched);
+                            return prediction;
+                        });
+                        
+                        async function getClasses(logits) {
+                            const values = await logits.data();
+                            console.log(values);
+                            callback(values);
+                            return values;
+                        }
+
+                        // Convert logits to probabilities and class names.
+                        const classes = await getClasses(logits);
+                        const totalTime1 = performance.now() - startTime1;
+                        const totalTime2 = performance.now() - startTime2;
+                        console.log(`Done in ${Math.floor(totalTime1)} ms ` +
+                            `(not including preprocessing: ${Math.floor(totalTime2)} ms)`);
+                        done_callback();
+                    };
+
+                    setTimeout(function(){ 
+                        //predict(imageData, width, height, channel);
+                        predict(element.nn_info.image, width, height, channel);
+                    }, 50);
+                    message("done");
+            """, img_path = img, width = width, height = height, channel = channel,
              callback = callback, message = self.message, done_callback = self.done_callback)
+        elif isinstance(img, np.ndarray):
+            d = img.flatten().tolist()
+            self.js_init("""
+                    const arr = new Uint8ClampedArray(d.length);
+                    // Iterate through every pixel
+                    for (let i = 0; i < arr.length; i += 4) {
+                    arr[i + 0] = d[i];    // R value
+                    arr[i + 1] = d[i+1];  // G value
+                    arr[i + 2] = d[i+2];    // B value
+                    arr[i + 3] = d[i+3];  // A value
+                    }
+                    let imageData = new ImageData(arr, width);
+                    console.log(imageData);
+                    element.nn_info.image = imageData;
+
+                    let my_model = element.nn_info.network;
+                    async function predict(imgElement, width, height, channel) {
+                        console.log('Predicting...');
+                        const startTime1 = performance.now();
+                        let startTime2;
+
+                        const logits = tf.tidy(() => {
+                            // tf.browser.fromPixels() returns a Tensor from an image element.
+                            const img_array = tf.browser.fromPixels(imgElement).toFloat();
+                            console.log(imgElement);
+                            console.log(img_array);
+                            const normalized = img_array.div(255.0);
+                            // Reshape to a single-element batch so we can pass it to predict.
+                            const batched = normalized.reshape([1, width, height, channel]);
+
+                            startTime2 = performance.now();
+                            const prediction = my_model.predict(batched);
+                            return prediction;
+                        });
+                        
+                        async function getClasses(logits) {
+                            const values = await logits.data();
+                            console.log(values);
+                            callback(values);
+                            return values;
+                        }
+
+                        // Convert logits to probabilities and class names.
+                        const classes = await getClasses(logits);
+                        const totalTime1 = performance.now() - startTime1;
+                        const totalTime2 = performance.now() - startTime2;
+                        console.log(`Done in ${Math.floor(totalTime1)} ms ` +
+                            `(not including preprocessing: ${Math.floor(totalTime2)} ms)`);
+                        done_callback();
+                    };
+
+                    setTimeout(function(){ 
+                        //predict(imageData, width, height, channel);
+                        predict(element.nn_info.image, width, height, channel);
+                    }, 50);
+                    message("done");
+            """, d = d, width = width, height = height, channel = channel,
+             callback = callback, message = self.message, done_callback = self.done_callback)
+        
+        # self.js_init("""
+        #     let my_model = element.nn_info.network;
+        #     async function predict(imgElement, width, height, channel) {
+        #         console.log('Predicting...');
+        #         const startTime1 = performance.now();
+        #         let startTime2;
+
+        #         const logits = tf.tidy(() => {
+        #             // tf.browser.fromPixels() returns a Tensor from an image element.
+        #             const img_array = tf.browser.fromPixels(imgElement).toFloat();
+        #             console.log(imgElement);
+        #             console.log(img_array);
+        #             const normalized = img_array.div(255.0);
+        #             // Reshape to a single-element batch so we can pass it to predict.
+        #             const batched = normalized.reshape([1, width, height, channel]);
+
+        #             startTime2 = performance.now();
+        #             const prediction = my_model.predict(batched);
+        #             return prediction;
+        #         });
+                
+        #         async function getClasses(logits) {
+        #             const values = await logits.data();
+        #             console.log(values);
+        #             callback(values);
+        #             return values;
+        #         }
+
+        #         // Convert logits to probabilities and class names.
+        #         const classes = await getClasses(logits);
+        #         const totalTime1 = performance.now() - startTime1;
+        #         const totalTime2 = performance.now() - startTime2;
+        #         console.log(`Done in ${Math.floor(totalTime1)} ms ` +
+        #             `(not including preprocessing: ${Math.floor(totalTime2)} ms)`);
+        #         done_callback();
+        #     };
+
+        #     setTimeout(function(){ 
+        #         //predict(imageData, width, height, channel);
+        #         predict(element.nn_info.image, width, height, channel);
+        #     }, 50);
+        #     message("done");
+        # """, width = width, height = height, channel = channel,
+        #      callback = callback, message = self.message, done_callback = self.done_callback)
         with ui_events() as poll:
             while self.classify_done is False:
                 poll(10)                # React to UI events (upto 10 at a time)

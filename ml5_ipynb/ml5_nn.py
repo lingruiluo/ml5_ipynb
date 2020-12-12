@@ -41,6 +41,7 @@ class neuralNetwork(jp_proxy_widget.JSProxyWidget):
         self.predict_callback_list = []
         self.train_done = False
         self.classify_done = False
+        self.predict_done = False
         self.model_created = False
         self.model_load = False
 
@@ -161,6 +162,9 @@ class neuralNetwork(jp_proxy_widget.JSProxyWidget):
     def predict_data(self, input, callback=None):
         if callback is None:
             callback = self.predict_callback
+        self.predict_done = True
+        def done_callback():
+            self.predict_done = True
         self.js_init("""
             function handleResults(error, result) {
                 if(error){
@@ -169,10 +173,17 @@ class neuralNetwork(jp_proxy_widget.JSProxyWidget):
                 }
                 console.log(result);
                 callback(result);
+                done_callback();
             }
             element.nn_info.network.predict(input, handleResults);
 
-        """, input=input, callback=callback)
+        """, input=input, callback=callback, done_callback=done_callback)
+        with ui_events() as poll:
+            while self.predict_done is False:
+                poll(10)                # React to UI events (upto 10 at a time)
+                print('.', end='')
+                time.sleep(0.1)
+        print('done')
 
     def predict_callback(self, info):
         self.predict_callback_list.append(info)
