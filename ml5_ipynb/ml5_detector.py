@@ -147,7 +147,7 @@ class ObjectDetector(ml5_nn.neuralNetwork):
                 normalized_w = int(dt['normalized']['width']*width)
                 normalized_h = int(dt['normalized']['height']*height)
                 print(dt['label'],normalized_x,normalized_y,normalized_w,normalized_h )
-                ax.annotate(dt['label'], xy=(normalized_x, normalized_y), xytext=(10, -10),textcoords="offset points",color=text_color)
+                ax.annotate("%s" %dt['label']+"("+str(round(dt['confidence']*100,2))+"%)", xy=(normalized_x, normalized_y), xytext=(10, -10),textcoords="offset points",color=text_color)
                 normalized_img = cv2.rectangle(normalized_img,
                                     (normalized_x,normalized_y),
                                     (normalized_x+normalized_w,normalized_y+normalized_h),
@@ -163,7 +163,7 @@ class ObjectDetector(ml5_nn.neuralNetwork):
                 w = int(dt['width'])
                 h = int(dt['height'])
                 print(dt['label'],x, y, w, h )
-                ax.annotate(dt['label'], xy=(x, y), xytext=(10, -10),textcoords="offset points",color=text_color)
+                ax.annotate("%s" %dt['label']+"("+str(round(dt['confidence']*100,2))+"%)", xy=(x, y), xytext=(10, -10),textcoords="offset points",color=text_color)
                 un_img = cv2.rectangle(un_img,(x, y),
                                     (x+w, y+h),box_color,box_thick)
             
