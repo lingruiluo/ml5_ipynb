@@ -320,7 +320,8 @@ class imageClassifier(ml5_nn.neuralNetwork):
 
 class featureExtractor(ml5_nn.neuralNetwork):
     
-    def __init__(self, task, model='MobileNet', options=None, *pargs, **kwargs):
+    def __init__(self, task, model='MobileNet', options=None, 
+                numLabels = None, learningRate = None, epochs = None, *pargs, **kwargs):
         super(featureExtractor,self).__init__(options=options,*pargs, **kwargs)
         self.element.html("Loaded ml5.js")
         self.classify_callback_list = []
@@ -328,23 +329,32 @@ class featureExtractor(ml5_nn.neuralNetwork):
         self.model_load = False
         def model_ready():
             self.model_load = True
+        self.options = options
+        if options is None:
+            self.options = self.default_options()
+        if numLabels is not None:
+            self.options['numLabels'] = numLabels
+        if learningRate is not None:
+            self.options['learningRate'] = learningRate
+        if epochs is not None:
+            self.options['epochs'] = epochs
         if task == 'classification':
             self.js_init("""
                 element.nn_info = {};
-                const fe = ml5.featureExtractor(model,modelReady);
-                const classifier = fe.classification();
+                const fe = ml5.featureExtractor(model = model, callback = modelReady);
+                const classifier = fe.classification(null, options);
                 element.nn_info.network = classifier;
                 function modelReady() {
                     console.log('Model Ready!');
                     model_ready()
                 }
                 let imageData;
-            """,model = model,model_ready=model_ready)
+            """,model = model,model_ready=model_ready, options = self.options)
         else:
             self.js_init("""
                 element.nn_info = {};
-                const fe = ml5.featureExtractor(model,modelReady);
-                const regressor = fe.regression();
+                const fe = ml5.featureExtractor(model = model, callback = modelReady);
+                const regressor = fe.regression);
                 element.nn_info.network = regressor;
                 function modelReady() {
                     console.log('Model Ready!');
@@ -360,6 +370,18 @@ class featureExtractor(ml5_nn.neuralNetwork):
         print('Model is ready')
         time.sleep(0.05)
     
+    def default_options(self):
+        return {
+            'version': 1,
+            'alpha': 1.0,
+            'topk': 3,
+            'learningRate': 0.0001,
+            'hiddenUnits': 100,
+            'epochs': 20,
+            'numLabels': 2,
+            'batchSize': 0.4,
+            }
+
     def done_callback(self):
         self.track = True
 
@@ -374,6 +396,7 @@ class featureExtractor(ml5_nn.neuralNetwork):
                 }
                 imageData = new Image(width, height);
                 imageData.src = src;
+                console.log(imageData);
                 setTimeout(function(){ 
                     element.nn_info.network.addImage(imageData, label, image_added);
                      }, 30);
@@ -444,15 +467,16 @@ class featureExtractor(ml5_nn.neuralNetwork):
         
         if callback is None:
             callback = self.classify_callback
-
+        def classify_callback(info):
+            self.classify_callback_list.append(info)
         if isinstance(img,str):
             self.js_init("""
-                let new_image = new Image(width, height);
+                new_image = new Image(width, height);
                 new_image.src = src;
                 setTimeout(function(){ 
                     element.nn_info.network.classify(new_image, (err, result) => {
-                        console.log(result);
                         callback(result); 
+                        console.log(result); 
                         done_callback();
                     })}, 30);
             """, src=img, 
