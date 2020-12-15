@@ -142,31 +142,6 @@ class word2Vec(ml5_nn.neuralNetwork):
                 time.sleep(0.1)
         print('done')
 
-    def nearest(self, word, callback = None):
-        self.track = False
-        def nearest_callback(results):
-            self.nearest_results.append(results)
-            self.track = True
-        if callback is None:
-            callback = nearest_callback
-
-        self.js_init("""
-            element.nn_info.network.nearest(word, (err, results)=>{
-                if(err){
-                    console.error(err);
-                    return;
-                }
-                console.log(results);
-                callback(results);
-            });
-        """, word = word, callback = callback)
-        with ui_events() as poll:
-            while self.track is False:
-                poll(10)                # React to UI events (upto 10 at a time)
-                print('.', end='')
-                time.sleep(0.1)
-        print('done')
-
     def nearestFromSet(self, word, word_set, callback = None):
         self.track = False
         def nearestSet_callback(results):
