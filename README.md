@@ -6,7 +6,7 @@ Wraps up ml5.js for Jupyter interface
 
 ## Goal
 
-`ml5_ipynb` is designed to allow implementation of the Javascript module [`ml5.js`](https://ml5js.org/) on Jupyter interface for a faster training of simple neural network models and pre-train models with remote GPU.
+`ml5_ipynb` is designed to allow implementation of the Javascript module [`ml5.js`](https://ml5js.org/) on Jupyter interface for training and result presentation of simple neural network models and pre-train models using local machine.
 
 ## Install
 
