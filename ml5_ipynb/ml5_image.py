@@ -354,7 +354,7 @@ class featureExtractor(ml5_nn.neuralNetwork):
             self.js_init("""
                 element.nn_info = {};
                 const fe = ml5.featureExtractor(model = model, callback = modelReady);
-                const regressor = fe.regression);
+                const regressor = fe.regression();
                 element.nn_info.network = regressor;
                 function modelReady() {
                     console.log('Model Ready!');
