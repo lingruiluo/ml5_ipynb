@@ -39,7 +39,7 @@ The type of task can be specified in the `options` before initializing the netwo
 ```python
 nn = ml5_ipynb.ml5_nn.neuralNetwork()
 ```
-Examples include [`Simple neural network examples`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Simple%20neural%20network%20examples.ipynb), [`CO2 emission example with multi-layers NN`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/CO2%20emission%20example%20with%20multi-layers%20NN.ipynb).
+Examples include [`Simple neural network examples`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Simple%20neural%20network%20examples.ipynb), [`CO2 emission example with multi-layers NN`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/CO2%20Emission%20Example%20with%20multi-layers%20NN.ipynb).
 
 The network can also be collaborated with other Jupyter widgets such as [`jp_doodle`](https://github.com/AaronWatters/jp_doodle). The following example [`Color classification widget`](https://github.com/lingruiluo/ml5_ipynb/blob/main/examples/Color%20classification%20widget.ipynb) is a small color classification tool built by ml5_ipynb and jp_doodle. 
 <p align="center">
